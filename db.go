@@ -3,32 +3,36 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"log"
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func ConnectDB() (*sql.DB, error) {
+
+	// Loads .env locally.
+	// On Render, .env doesn't exist, so continue normally.
+	_ = godotenv.Load()
+
 	databaseURL := os.Getenv("DATABASE_URL")
 
 	if databaseURL == "" {
-		return nil, fmt.Errorf("Database URL not found")
+		log.Fatal("DATABASE_URL not found")
 	}
 
-	db, errDB := sql.Open("pgx", databaseURL)
-	if errDB != nil {
-		return nil, fmt.Errorf("database connection failed: %w", errDB)
+	db, err := sql.Open("pgx", databaseURL)
+	if err != nil {
+		return nil, err
 	}
 
-	ctxBackground := context.Background()
-	ctx, cancel := context.WithTimeout(ctxBackground, 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("database connection failed: %w", err)
+		return nil, err
 	}
 
 	return db, nil
