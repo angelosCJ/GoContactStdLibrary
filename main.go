@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-
-	"github.com/joho/godotenv"
+	"os"
 )
 
 type Server struct {
@@ -13,11 +12,6 @@ type Server struct {
 }
 
 func main() {
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env")
-	}
 
 	db, err := ConnectDB()
 	if err != nil {
@@ -39,9 +33,14 @@ func main() {
 	mux.HandleFunc("PUT /contacts/{id}", server.UpdateContact)
 	mux.HandleFunc("DELETE /contacts/{id}", server.DeleteContact)
 
-	log.Println("Server running on http://localhost:8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	log.Println("Server running on port", port)
+
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		log.Fatal(err)
 	}
 }
