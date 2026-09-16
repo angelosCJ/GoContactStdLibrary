@@ -6,8 +6,6 @@ import (
 	"log"
 	"os"
 	"time"
-
-	"github.com/joho/godotenv"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
