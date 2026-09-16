@@ -54,9 +54,11 @@ func main() {
 		port = "8080"
 	}
 
+	handler := enableCORS(mux)
+
 	log.Println("Server running on port", port)
 
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatal(err)
 	}
 }
