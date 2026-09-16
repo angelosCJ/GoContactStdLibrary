@@ -3,22 +3,19 @@ package main
 import (
 	"context"
 	"database/sql"
-	"log"
+	"fmt"
 	"os"
 	"time"
+
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func ConnectDB() (*sql.DB, error) {
 
-	// Loads .env locally.
-	// On Render, .env doesn't exist, so continue normally.
-	_ = godotenv.Load()
-
 	databaseURL := os.Getenv("DATABASE_URL")
 
 	if databaseURL == "" {
-		log.Fatal("DATABASE_URL not found")
+		return nil, fmt.Errorf("DATABASE_URL not found")
 	}
 
 	db, err := sql.Open("pgx", databaseURL)
