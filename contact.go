@@ -46,10 +46,30 @@ func (s *Server) CreateContact(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) GetContacts(w http.ResponseWriter, r *http.Request) {
 
-	rows, err := s.db.QueryContext(
-		r.Context(),
-		"SELECT id, name, phone, email FROM contacts",
-	)
+	name := r.URL.Query().Get("name")
+
+	var rows *sql.Rows
+	var err error
+
+	if name == "" {
+
+		// Get all contacts
+		rows, err = s.db.QueryContext(
+			r.Context(),
+			"SELECT id, name, phone, email FROM contacts",
+		)
+
+	} else {
+
+		// Search contacts by name
+		rows, err = s.db.QueryContext(
+			r.Context(),
+			`SELECT id, name, phone, email
+			 FROM contacts
+			 WHERE name ILIKE $1`,
+			"%"+name+"%",
+		)
+	}
 
 	if err != nil {
 		http.Error(w, "Failed to query contacts", http.StatusInternalServerError)
@@ -88,6 +108,7 @@ func (s *Server) GetContacts(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(contacts)
 }
+
 
 func (s *Server) GetContactByID(w http.ResponseWriter, r *http.Request) {
 
